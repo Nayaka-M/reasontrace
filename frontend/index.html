@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>ReasonTrace</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #1e40af;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .correct {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ReasonTrace</h1>
+
+    <label>Enter your reasoning:</label>
+    <textarea id="reasoning" placeholder="Type your reasoning here..."></textarea>
+
+    <button onclick="analyzeReasoning()">Analyze</button>
+
+    <div id="output"></div>
+</div>
+
+<script>
+async function analyzeReasoning() {
+    const reasoningText = document.getElementById("reasoning").value;
+    const outputDiv = document.getElementById("output");
+
+    if (!reasoningText.trim()) {
+        alert("Please enter reasoning text");
+        return;
+    }
+
+    outputDiv.innerHTML = "Analyzing...";
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/analyze", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                reasoning: reasoningText
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.verdict === "correct") {
+            outputDiv.innerHTML = `
+                <div class="result correct">
+                    <strong>Verdict:</strong> Correct ✅<br><br>
+                    ${data.explanation}
+                </div>
+            `;
+        } else {
+            outputDiv.innerHTML = `
+                <div class="result incorrect">
+                    <strong>Verdict:</strong> Incorrect ❌<br><br>
+                    ${data.explanation}
+                </div>
+            `;
+        }
+
+    } catch (error) {
+        outputDiv.innerHTML = "Error connecting to backend";
+        console.error(error);
+    }
+}
+</script>
+
+</body>
+</html>
+
+
